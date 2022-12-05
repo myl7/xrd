@@ -41,7 +41,7 @@ func SelfSignedCertificate(name pkix.Name) ([]byte, *ecdsa.PrivateKey) {
 		Subject:      name,
 
 		PublicKeyAlgorithm: x509.ECDSA,
-		PublicKey:          priv.PublicKey,
+		PublicKey:          &priv.PublicKey,
 
 		IsCA:     true,
 		KeyUsage: x509.KeyUsageCertSign,
@@ -52,6 +52,8 @@ func SelfSignedCertificate(name pkix.Name) ([]byte, *ecdsa.PrivateKey) {
 
 	if ip := net.ParseIP(name.CommonName); ip != nil {
 		template.IPAddresses = []net.IP{ip}
+	} else {
+		template.DNSNames = []string{name.CommonName}
 	}
 
 	der, err := x509.CreateCertificate(rand.Reader, template, template, &priv.PublicKey, priv)
